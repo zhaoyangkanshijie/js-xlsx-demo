@@ -9,6 +9,8 @@
 </head>
 
 <body>
+    <input type="file" id="excel-file" name="upload"  >
+    <input type="text" id="hiddata" value="">
     <table id="table1" border="1" cellspacing="0" cellpadding="0">
         <thead>
             <tr>
@@ -25,7 +27,7 @@
                 <td>1</td>
                 <td>张三</td>
                 <td>18</td>
-                <td>打游戏</td>
+                <td>聚义光和热</td>
                 <td>320322184087562589</td>
                 <td>1374569821</td>
             </tr>
@@ -33,7 +35,7 @@
                 <td>2</td>
                 <td>李四</td>
                 <td>88</td>
-                <td>看电影</td>
+                <td>爱上风风光光</td>
                 <td>420322184087562589</td>
                 <td>2374569821</td>
             </tr>
@@ -41,7 +43,7 @@
                 <td>3</td>
                 <td>王五</td>
                 <td>81</td>
-                <td>睡觉</td>
+                <td>电饭锅地方</td>
                 <td>520322184087562589</td>
                 <td>3374569821</td>
             </tr>
@@ -53,11 +55,55 @@
 
     <button id="btn" onclick="btn_export()">导出</button>
 </body>
+<script src="js/jquery-3.3.1.min.js"></script>
 <script src="js/xlsx.extendscript.js"></script>
 <script src="js/xlsx-style/xlsx.full.min.js"></script>
+<script src="js/xlsx.core.min.js"></script>
 
 <script src="js/export.js"></script>
 <script>
+    $(function () {
+        $('#excel-file').change(function(e) {
+            var files = e.target.files;
+
+            var fileReader = new FileReader();
+            fileReader.onload = function(ev) {
+                try {
+                    var data = ev.target.result,
+                            workbook = XLSX.read(data, {
+                                type: 'binary'
+                            }), // 以二进制流方式读取得到整份excel表格对象
+                            persons = []; // 存储获取到的数据
+                } catch (e) {
+                    alert('文件类型不正确');
+                    return;
+                }
+
+                // 表格的表格范围，可用于判断表头是否数量是否正确
+                var fromTo = '';
+                // 遍历每张表读取
+                for (var sheet in workbook.Sheets) {
+                    if (workbook.Sheets.hasOwnProperty(sheet)) {
+                        fromTo = workbook.Sheets[sheet]['!ref'];
+                        console.log(fromTo);
+                        persons = persons.concat(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]));
+                        //发现json格式不是你想要的你可以
+//XLSX.utils.sheet_to_json(workbook.Sheets[sheet],{raw:true, header:1})
+                        // 如果只取第一张表，就取消注释这行
+                        $("#hiddata").val(JSON.stringify(persons));
+                        console.log(persons);
+                        break; // 如果只取第一张表，就取消注释这行
+                    }
+                }
+
+
+            };
+
+            // 以二进制方式打开文件
+            fileReader.readAsBinaryString(files[0]);
+
+        })
+    });
     function btn_export() {
         var table1 = document.querySelector("#table1");
         var opt = {
@@ -66,7 +112,7 @@
         var sheet = XLSX2.utils.table_to_sheet(table1, opt);
         sheet["A1"] = {
             t: "s",
-            v: '三鹿集团有限公司'
+            v: '去热饭的水果放到'
         }; //给A1单元格赋值
         sheet["A1"].s = {
             font: {
